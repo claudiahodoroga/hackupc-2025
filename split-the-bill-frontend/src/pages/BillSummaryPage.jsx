@@ -1,48 +1,157 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-import FoodItemList from "../components/FoodItemList"; // Adjust path if needed
+import FoodItemList from "../components/FoodItemList";
+import SearchBar from "../components/SearchBar";
 
-// --- Placeholder Data for Testing ---
-const placeholderData = {
-  items: [
-    { name: "Placeholder Burger", price: 12.99 },
-    { name: "Placeholder Fries", price: 4.5 },
-    { name: "Placeholder Soda", price: 2.0 },
-  ],
-  total: 19.49,
-};
+// Sample data for the friends list
+const friendsData = [
+  { name: "Lila Landa", phone: "+34 612 345 678" },
+  { name: "Jhon", phone: "+34 612 345 678" },
+  { name: "Ferran", phone: "+34 612 345 678" },
+];
+
+// Icons components
+const SearchIcon = () => (
+  <svg
+    className="search-icon"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="11" cy="11" r="8"></circle>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+);
+
+const SparkleIcon = () => (
+  <svg
+    className="sparkle-icon"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 2l3 6 6 1-4.5 4.5 1 6-5.5-3-5.5 3 1-6L3 9l6-1 3-6z"></path>
+  </svg>
+);
+
+const PenIcon = () => (
+  <svg
+    className="pen-icon"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 20h9"></path>
+    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+  </svg>
+);
 
 const BillSummaryPage = () => {
   const location = useLocation();
-  // Use data from navigation state if available, otherwise use placeholder
-  const billData = location.state?.billData || placeholderData;
 
-  // Ensure billData and billData.items exist before rendering FoodItemList
-  if (!billData || !billData.items) {
-    // Handle case where data is missing or invalid (optional)
-    return (
-      <div className="p-6 max-w-md mx-auto text-center">
-        <h1 className="text-2xl font-bold mb-4">Bill Summary</h1>
-        <p className="text-red-500">Error: Bill data not found.</p>
-        {/* Optionally show placeholder data even on error */}
-        <h2 className="text-xl font-semibold mt-6 mb-2">Placeholder Items</h2>
-        <FoodItemList
-          items={placeholderData.items}
-          total={placeholderData.total}
-        />
-      </div>
-    );
-  }
+  // Use data from navigation state if available, otherwise use sample data
+  const billData = location.state?.billData || {
+    items: [
+      { name: "Burger", price: 9.5 },
+      { name: "Fries", price: 4.0 },
+      { name: "HotDog", price: 7.5 },
+      { name: "Coke", price: 2.6 },
+    ],
+    total: 23.6,
+  };
+
+  const [selectedFriends, setSelectedFriends] = useState({});
+
+  const handleFriendSelect = (friendName) => {
+    setSelectedFriends((prev) => ({
+      ...prev,
+      [friendName]: !prev[friendName],
+    }));
+  };
+
+  const handleSearch = (query) => {
+    console.log("Searching for:", query);
+    // Add search functionality here
+  };
+
+  const handleEditItems = () => {
+    console.log("Edit items clicked");
+    // Add edit functionality here
+  };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4 text-center">Bill Summary</h1>
-      {/* Pass the items and total to FoodItemList */}
-      <FoodItemList items={billData.items} total={billData.total} />
+    <div className="app-container">
+      <div className="header-area">
+        <h1>Split the bill</h1>
+        <div className="search-container">
+          <div className="search-bar">
+            <SearchIcon />
+            <input type="text" placeholder="Search for a contact" />
+          </div>
+          <button className="ai-button">
+            <SparkleIcon />
+            Try telling the AI
+          </button>
+        </div>
+      </div>
 
-      {/* Add other functionalities like splitting the bill later */}
-      <div className="mt-6 text-center">
-        {/* Add buttons or components for splitting */}
+      <div className="items-section">
+        <div className="subtitle">
+          <span>Items</span>
+          <button className="edit-button" onClick={handleEditItems}>
+            <PenIcon />
+            Edit
+          </button>
+        </div>
+
+        <div className="items-card">
+          {billData.items.map((item, index) => (
+            <div key={index} className="item-row">
+              <span className="item-name">{item.name}</span>
+              <span className="item-price">${item.price.toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="total-amount">Total : ${billData.total.toFixed(2)}</div>
+      </div>
+
+      <div className="friends-section">
+        <h2>Select friends to split with</h2>
+        <div className="friends-card">
+          {friendsData.map((friend, index) => (
+            <div key={index} className="friend-row">
+              <input
+                type="checkbox"
+                className="friend-checkbox"
+                checked={selectedFriends[friend.name] || false}
+                onChange={() => handleFriendSelect(friend.name)}
+              />
+              <div className="friend-avatar"></div>
+              <div className="friend-info">
+                <div className="friend-name">{friend.name}</div>
+                <div className="friend-phone">{friend.phone}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="footer">
+        <button className="cancel-button">Cancel</button>
+        <button className="accept-button">Accept</button>
       </div>
     </div>
   );

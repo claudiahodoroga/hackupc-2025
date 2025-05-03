@@ -3,14 +3,14 @@ import Button from "../components/button"; // Import the Button component
 import { Camera, X } from "lucide-react"; // Import camera and X icons
 import { useNavigate } from "react-router-dom";
 
-const navigate = useNavigate();
-
 const ScanBillPage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [parsedData, setParsedData] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
 
   // Handle gallery image selection
   const handleGallerySelect = () => {
@@ -25,6 +25,8 @@ const ScanBillPage = () => {
     const file = e.target.files[0];
     if (file) {
       setUploadError(null);
+      setUploadSuccess(false);
+      setSelectedImage(URL.createObjectURL(file));
       handleImageUpload(file);
       // Reset the input value so the same file can be selected again if needed
       e.target.value = "";
@@ -41,62 +43,63 @@ const ScanBillPage = () => {
 
   // Handle image upload
   const handleImageUpload = async (file) => {
+    setIsUploading(true);
+    setUploadError(null);
+    setUploadSuccess(false);
+    setParsedData(null);
     try {
-      setIsUploading(true);
-      setParsedData(null);
+      // client-side validation
+      if (!file.type.startsWith("image/")) {
+        throw new Error("Please select an image file.");
+      }
 
-      // Check file type
       if (!file.type.startsWith("image/")) {
         throw new Error("Please select an image file");
       }
 
-      // Check file size (limit to 10MB)
       if (file.size > 10 * 1024 * 1024) {
         throw new Error("Image size must be less than 10MB");
       }
 
-      // Create a preview
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (e) => {
-        const result = e.target.result;
-        setSelectedImage(result);
-      };
-
-      // Prepare the form data for API submission
       const formData = new FormData();
       formData.append("image", file);
 
       // Call the AI API to analyze the image
-      try {
-        // Replace with your actual API endpoint
-        const response = await fetch("https://your-api-endpoint.com/analyze", {
-          method: "POST",
-          body: formData,
-        });
+      // Replace with your actual API endpoint
+      const response = await fetch("https://your-api-endpoint.com/analyze", {
+        method: "POST",
+        body: formData,
+      });
 
-        if (!response.ok) {
-          throw new Error(`API responded with status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // Process the parsed data
-        setParsedData({
-          items: data.items || [],
-          total: data.total || 0,
-        });
-
-        console.log("Image analyzed successfully:", data);
-
-        NavigationHistoryEntry("/BillSummaryPage", { state: parsed });
-      } catch (apiError) {
-        console.error("API error:", apiError);
-        // Don't throw here to still show the image even if API fails
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(
+          `API Error: ${response.status} - ${
+            errorData || "Failed to analyze image"
+          }`
+        );
       }
+
+      const rawData = await response.json();
+      // Expects { "ItemName1": price1, "ItemName2": price2, ... }
+
+      // Parse the data (assuming object format {name: price})
+      const items = Object.entries(rawData).map(([name, price]) => ({
+        name,
+        // Ensure price is a number
+        price: typeof price === "number" ? price : parseFloat(price) || 0,
+      }));
+
+      const total = items.reduce((sum, item) => sum + item.price, 0);
+
+      // Store the parsed items and total for summary page
+      setParsedData({ items, total });
+      setUploadSuccess(true);
+
+      console.log("Image analyzed successfully:", { items, total });
     } catch (error) {
-      console.error("Upload error:", error);
-      setUploadError(error.message || "Failed to upload image");
+      console.error("Upload/API error:", error);
+      setSelectedImage(null);
     } finally {
       setIsUploading(false);
     }
@@ -107,13 +110,24 @@ const ScanBillPage = () => {
     setSelectedImage(null);
     setParsedData(null);
     setUploadError(null);
+    setUploadSuccess(false);
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Navigate to bill summary page
+  const goToSummary = () => {
+    if (parsedData) {
+      navigate("/BillSummaryPage", { state: { billData: parsedData } }); // Pass data in state
+    }
   };
 
   return (
     <div className="flex flex-col items-center justify-center p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-8">Scan Document</h1>
+      <h1 className="text-2xl font-bold mb-8">Scan Bill</h1>
 
-      {/* Hidden file input - make sure it's really hidden */}
       <input
         type="file"
         ref={fileInputRef}
@@ -123,7 +137,7 @@ const ScanBillPage = () => {
         aria-hidden="true"
       />
 
-      {/* Only show button container if no image is selected */}
+      {/* Buttons shown only if no image is selected */}
       {!selectedImage && (
         <div className="w-full space-y-4 mb-6">
           <Button
@@ -141,9 +155,8 @@ const ScanBillPage = () => {
             type="button"
             id="camera-button"
             onClick={handleCameraCapture}
-            className={`w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center ${
-              isUploading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center"
+            disabled={isUploading}
           >
             <Camera className="mr-2" size={20} />
             Scan Document
@@ -151,7 +164,7 @@ const ScanBillPage = () => {
         </div>
       )}
 
-      {/* Loading state */}
+      {/* Loading Indicator */}
       {isUploading && (
         <div className="text-center mb-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
@@ -159,18 +172,25 @@ const ScanBillPage = () => {
         </div>
       )}
 
-      {/* Error message */}
-      {uploadError && (
+      {/* Error Message */}
+      {uploadError && !isUploading && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 w-full">
-          <p>{uploadError}</p>
+          <p>Error: {uploadError}</p>
         </div>
       )}
 
-      {/* Image preview and remove button */}
+      {/* Success Message */}
+      {uploadSuccess && !isUploading && !uploadError && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 w-full">
+          <p>Success! Image analyzed.</p>
+        </div>
+      )}
+
+      {/* Image Preview and Actions */}
       {selectedImage && !isUploading && (
         <div className="mt-4 w-full">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold">Document Preview</h2>
+            <h2 className="text-lg font-semibold">Bill Preview</h2>
             <Button
               type="button"
               onClick={handleRemoveImage}
@@ -181,47 +201,40 @@ const ScanBillPage = () => {
             </Button>
           </div>
 
-          <div className="border rounded-lg overflow-hidden relative">
+          <div className="border rounded-lg overflow-hidden mb-4">
             <img
               src={selectedImage}
-              alt="Selected document"
+              alt="Selected bill"
               className="w-full object-contain max-h-64"
             />
           </div>
 
-          {/* Parsed data display */}
-          {parsedData && (
-            <div className="mt-4 bg-gray-50 p-4 rounded-lg border">
-              <h3 className="text-md font-semibold mb-2">
-                Extracted Information
-              </h3>
-              <ul className="space-y-2">
-                <li className="flex justify-between">
-                  <span className="font-medium">Item:</span>
-                  <span>{parsedData.item}</span>
-                </li>
-                <li className="flex justify-between">
-                  <span className="font-medium">Price:</span>
-                  <span>{parsedData.price}</span>
-                </li>
-                <li className="flex justify-between">
-                  <span className="font-medium">Total:</span>
-                  <span>{parsedData.total}</span>
-                </li>
-              </ul>
-            </div>
-          )}
+          {/* Display raw parsed data for testing (optional) */}
+          {/* {parsedData && (
+                        <pre className="bg-gray-100 p-2 rounded text-xs overflow-auto mb-4">
+                            {JSON.stringify(parsedData, null, 2)}
+                        </pre>
+                    )} */}
 
-          {/* Re-scan button */}
-          <div className="mt-4">
+          {/* --- View Bill Summary Button --- */}
+          {parsedData && !uploadError && (
             <Button
               type="button"
-              onClick={handleGallerySelect}
-              className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors"
+              onClick={goToSummary}
+              className="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors mt-4"
             >
-              Scan Another Document
+              View Bill Summary
             </Button>
-          </div>
+          )}
+
+          {/* Button to Scan Again if an image was selected */}
+          <Button
+            type="button"
+            onClick={handleGallerySelect} // Or handleCameraCapture if preferred
+            className="w-full bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition-colors mt-2"
+          >
+            Scan Another Bill
+          </Button>
         </div>
       )}
     </div>

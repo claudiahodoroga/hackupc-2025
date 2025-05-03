@@ -1,10 +1,12 @@
 import React, { useState, useRef } from "react";
 import Button from "../components/button"; // Import the Button component
 import { Camera, X } from "lucide-react"; // Import camera and X icons
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const ScanBillPage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [parsedData, setParsedData] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -27,8 +29,9 @@ const ScanBillPage = () => {
       setUploadError(null);
       setUploadSuccess(false);
       setSelectedImage(URL.createObjectURL(file));
-      handleImageUpload(file);
-      // Reset the input value so the same file can be selected again if needed
+      setSelectedImageFile(file);
+      console.log("File selected:", file); // Check the File object
+      //handleImageUpload(file); // You're still passing 'file' here, let's keep it for now
       e.target.value = "";
     }
   };
@@ -41,15 +44,28 @@ const ScanBillPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (selectedImageFile) {
+      console.log("selectedImageFile state in useEffect: ", selectedImageFile);
+      handleImageUpload();
+    }
+  }, [selectedImageFile]);
+
   // Handle image upload
-  const handleImageUpload = async (file) => {
+  const handleImageUpload = async () => {
+    console.log("handleImageUpload called with file"); // Check if it receives anything
+    console.log(
+      "selectedImageFile state inside handleImageUpload:",
+      selectedImageFile
+    ); // Check the state here
+
     setIsUploading(true);
     setUploadError(null);
     setUploadSuccess(false);
     setParsedData(null);
     try {
       // client-side validation
-      if (!file.type.startsWith("image/")) {
+      if (!selectedImageFile?.type?.startsWith("image/")) {
         throw new Error("Please select an image file.");
       }
 

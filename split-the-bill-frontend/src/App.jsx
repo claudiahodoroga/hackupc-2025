@@ -1,11 +1,11 @@
 import { useState } from "react";
-import ScanBillPage from "./pages/ScanBillPage";
+import SearchBar from "./components/Searchbar";
 import "./App.css";
 
 function App() {
   return (
-    <div className="app-container">
-      <ScanBillPage />
+    <div className="min-h-screen bg-gray-100 p-6">
+      <SearchBar />
     </div>
   );
 }

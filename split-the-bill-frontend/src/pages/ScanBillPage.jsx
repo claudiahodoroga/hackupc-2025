@@ -10,7 +10,7 @@ const ScanBillPage = () => {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const fileInputRef = useRef(null);
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   // Handle gallery image selection
   const handleGallerySelect = () => {
@@ -53,22 +53,17 @@ const ScanBillPage = () => {
         throw new Error("Please select an image file.");
       }
 
-      if (!file.type.startsWith("image/")) {
-        throw new Error("Please select an image file");
-      }
-
       if (file.size > 10 * 1024 * 1024) {
         throw new Error("Image size must be less than 10MB");
       }
 
       const formData = new FormData();
-      formData.append("image", file);
+      formData.append("image", selectedImageFile); // 'selectedImageFile' es un objeto File
 
-      // Call the AI API to analyze the image
-      // Replace with your actual API endpoint
-      const response = await fetch("https://your-api-endpoint.com/analyze", {
-        method: "POST",
-        body: formData,
+      const response = await axios.post("/api/image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       if (!response.ok) {
@@ -120,7 +115,8 @@ const ScanBillPage = () => {
   // Navigate to bill summary page
   const goToSummary = () => {
     if (parsedData) {
-      navigate("/BillSummaryPage", { state: { billData: parsedData } }); // Pass data in state
+      //navigate("/BillSummaryPage", { state: { billData: parsedData } }); // Pass data in state
+      console.log(parsedData);
     }
   };
 

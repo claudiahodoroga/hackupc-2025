@@ -1,7 +1,7 @@
 // src/components/SearchPage.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import SearchBar from "../components/Searchbar";
+import SearchBar from "../components/SearchBar";
 
 const SearchPage = () => {
   const [results, setResults] = useState([]);

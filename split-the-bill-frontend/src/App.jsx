@@ -1,18 +1,13 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import ApiTest from './components/ApiTest'
-import './App.css'
-import React from 'react'
-import SearchPage from './components/SearchPage'
+import { useState } from "react";
+import ScanBillPage from "./pages/ScanBillPage";
+import "./App.css";
 
 function App() {
   return (
-   
-    <div>
-      <SearchPage />
+    <div className="app-container">
+      <ScanBillPage />
     </div>
   );
 }
 
-export default App
+export default App;

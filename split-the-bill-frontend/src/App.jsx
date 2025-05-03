@@ -6,9 +6,14 @@ import './App.css'
 function App() {
   const [count, setCount] = useState(0)
 
+//   const [query, setQuery] = useState("");
   return (
     <>
       <div>
+        <main>
+          <h2>Búsqueda</h2>
+          <SearchBar />
+        </main>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>

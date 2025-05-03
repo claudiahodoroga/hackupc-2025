@@ -1,24 +1,14 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ScanBillPage from "./pages/ScanBillPage"; // Adjust path as needed
-import BillSummaryPage from "./pages/BillSummaryPage"; // Adjust path as needed
-import "./App.css"; // Or your main CSS file
+import { useState } from "react";
+import ScanBillPage from "./pages/RecordAudioPage";
+import "./App.css";
+import RecordingAudioPage from "./pages/RecordAudioPage";
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-100">
-        {" "}
-        {/* Basic layout */}
-        <Routes>
-          {/* Default route */}
-
-          {/* Route for the summary page */}
-          <Route path="/BillSummaryPage" element={<BillSummaryPage />} />
-          {/* Add other routes as needed */}
-        </Routes>
-      </div>
-    </Router>
+    <div>
+      <h1> Upload a recording of your bill</h1>
+        <RecordingAudioPage />
+    </div>
   );
 }
 

@@ -1,10 +1,12 @@
-import React from 'react';
+import React from "react";
 function List({ items }) {
-return (
-<ul>
-    {items.map((item, index) => (
+  return (
+    <ul>
+      {items.map((item, index) => (
         <li key={index}></li>
-    ))}
-</ul>
-);
+      ))}
+    </ul>
+  );
 }
+
+export default List;

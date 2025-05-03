@@ -1,6 +1,9 @@
 import React, { useState, useRef } from "react";
 import Button from "../components/button"; // Import the Button component
 import { Camera, X } from "lucide-react"; // Import camera and X icons
+import { useNavigate } from "react-router-dom";
+
+const navigate = useNavigate();
 
 const ScanBillPage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -56,7 +59,6 @@ const ScanBillPage = () => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = (e) => {
-        // Fix the setState with string issue
         const result = e.target.result;
         setSelectedImage(result);
       };
@@ -81,12 +83,13 @@ const ScanBillPage = () => {
 
         // Process the parsed data
         setParsedData({
-          item: data.item || "Unknown item",
-          price: data.price || "Unknown price",
-          total: data.total || "Unknown total",
+          items: data.items || [],
+          total: data.total || 0,
         });
 
         console.log("Image analyzed successfully:", data);
+
+        NavigationHistoryEntry("/BillSummaryPage", { state: parsed });
       } catch (apiError) {
         console.error("API error:", apiError);
         // Don't throw here to still show the image even if API fails

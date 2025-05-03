@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Button from "../components/button"; // Import the Button component
 import { Camera, X } from "lucide-react"; // Import camera and X icons
 //import { useNavigate } from "react-router-dom";
@@ -53,11 +53,11 @@ const ScanBillPage = () => {
 
   // Handle image upload
   const handleImageUpload = async () => {
-    console.log("handleImageUpload called with file"); // Check if it receives anything
+    console.log("handleImageUpload called");
     console.log(
       "selectedImageFile state inside handleImageUpload:",
       selectedImageFile
-    ); // Check the state here
+    );
 
     setIsUploading(true);
     setUploadError(null);
@@ -65,6 +65,12 @@ const ScanBillPage = () => {
     setParsedData(null);
     try {
       // client-side validation
+      if (!selectedImageFile) {
+        // Add this check
+        console.log("selectedImageFile is null, not proceeding with upload.");
+        return; // Exit the function if no file is selected yet
+      }
+
       if (!selectedImageFile?.type?.startsWith("image/")) {
         throw new Error("Please select an image file.");
       }

@@ -42,7 +42,6 @@ const BillSummaryPage = () => {
 
       {/* Add other functionalities like splitting the bill later */}
       <div className="mt-6 text-center">
-        <p className="text-gray-600">Next steps: Assign items to people.</p>
         {/* Add buttons or components for splitting */}
       </div>
     </div>

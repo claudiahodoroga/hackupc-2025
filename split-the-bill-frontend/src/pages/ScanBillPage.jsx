@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+<<<<<<< Updated upstream
 import axios from "axios";
 import { Camera, X, ArrowLeft } from "lucide-react"; // Import Arrow icon
+=======
+import { Camera, X } from "lucide-react"; // Import Arrow icon
+>>>>>>> Stashed changes
 import "../assets/styles/ScanBillPage.css"; // Import our new CSS file
 
 const ScanBillPage = () => {

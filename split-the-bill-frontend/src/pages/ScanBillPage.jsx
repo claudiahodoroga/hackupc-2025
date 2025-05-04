@@ -57,7 +57,7 @@ const ScanBillPage = () => {
       }
 
       const formData = new FormData();
-      formData.append("image", file);
+      formData.append("image_file", file);
 
       const response = await axios.post("/api/image", formData, {
         headers: {
@@ -65,7 +65,7 @@ const ScanBillPage = () => {
         },
       });
 
-      const rawData = await response.json();
+      const rawData = await response.data;
       // Expects { "ItemName1": price1, "ItemName2": price2, ... }
 
       // // Mock response data

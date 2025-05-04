@@ -65,15 +65,6 @@ const ScanBillPage = () => {
         },
       });
 
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(
-          `API Error: ${response.status} - ${
-            errorData || "Failed to analyze image"
-          }`
-        );
-      }
-
       const rawData = await response.json();
       // Expects { "ItemName1": price1, "ItemName2": price2, ... }
 
@@ -98,7 +89,13 @@ const ScanBillPage = () => {
       setUploadSuccess(true);
     } catch (error) {
       console.error("Upload/API error:", error);
-      setUploadError(error.message);
+      setUploadError(
+        error.response
+          ? `Server error: ${error.response.status} - ${
+              error.response.data || "Unknown error"
+            }`
+          : error.message
+      );
       setSelectedImage(null);
     } finally {
       setIsUploading(false);

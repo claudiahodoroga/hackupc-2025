@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import FoodItemList from "../components/FoodItemList";
 import SearchBar from "../components/SearchBar";
 import FriendsList from "../components/FriendsList";
@@ -56,6 +57,7 @@ const PenIcon = () => (
 const BillSummaryPage = () => {
   const location = useLocation();
   const [friends, setFriends] = useState([]);
+  const navigate = useNavigate();
 
   // Use data from navigation state if available, otherwise use sample data
   const billData = location.state?.billData || {
@@ -115,15 +117,28 @@ const BillSummaryPage = () => {
   const handleAccept = () => {
     const itemFriendMap = {};
 
+    console.log("Friends array:", friends);
+    console.log("Item assignments:", itemAssignments);
+
     billData.items.forEach((item, index) => {
       const assignedFriendIds = Object.keys(
         itemAssignments[index] || {}
       ).filter((friendId) => itemAssignments[index][friendId]);
 
-      // Map IDs to names
+      console.log(`Selected friends for ${item.name}:`, assignedFriendIds);
+
+      // Map IDs to names - make sure we're handling string IDs correctly
       const assignedFriendNames = assignedFriendIds.map((id) => {
-        const friend = friends.find((f) => f.id === id);
-        return friend ? friend.name : id;
+        // API might return friends with string or number IDs
+        const friend = friends.find((f) => String(f.id) === String(id));
+
+        if (friend) {
+          console.log(`Found friend for ID ${id}:`, friend.name);
+          return friend.name;
+        } else {
+          console.log(`No friend found for ID ${id}`);
+          return `Unknown (ID: ${id})`;
+        }
       });
 
       itemFriendMap[item.name] = assignedFriendNames;
@@ -131,7 +146,7 @@ const BillSummaryPage = () => {
 
     console.log("Item-to-friends map:", itemFriendMap);
 
-    // Si también quieres hacer el cálculo del monto dividido:
+    // Calculate the split amounts for each item
     const paymentData = {
       items: billData.items.map((item, index) => {
         const assignedFriendNames = itemFriendMap[item.name];
@@ -147,7 +162,7 @@ const BillSummaryPage = () => {
       total: billData.total,
     };
 
-    console.log("Payment data with names:", paymentData);
+    navigate("/FinalViewPage", { state: { paymentData } });
   };
 
   return (
@@ -198,7 +213,7 @@ const BillSummaryPage = () => {
       <div className="footer">
         <button className="cancel-button">Cancel</button>
         <button className="accept-button" onClick={handleAccept}>
-          Accept
+          Finish Process
         </button>
       </div>
     </div>

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import FoodItemList from "../components/FoodItemList";
 import SearchBar from "../components/SearchBar";
+import "../assets/styles/BillSummaryPage.css"; // Import our new CSS file
 
 // Sample data for the friends list
 const friendsData = [

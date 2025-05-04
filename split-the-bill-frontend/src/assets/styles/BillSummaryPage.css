@@ -253,3 +253,13 @@ h2 {
   cursor: pointer;
   box-shadow: 0 0 8px 12px rgba(44, 100, 227, 0.18);
 }
+
+/* Frame border for phone view */
+.app-container {
+  border: 1px solid #9b9b9c;
+  border-radius: 32px;
+  overflow: hidden;
+  width: 389px;
+  height: 844px;
+  margin: 0 auto;
+}

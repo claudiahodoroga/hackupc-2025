@@ -1,5 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Camera, X, ArrowLeft } from "lucide-react"; // Import Arrow icon
 import "../assets/styles/ScanBillPage.css"; // Import our new CSS file
 
@@ -26,6 +27,7 @@ const ScanBillPage = () => {
       setUploadError(null);
       setUploadSuccess(false);
       setSelectedImage(URL.createObjectURL(file));
+      console.log("File selected:", file); // Check the File object
       handleImageUpload(file);
       e.target.value = "";
     }
@@ -57,19 +59,35 @@ const ScanBillPage = () => {
       const formData = new FormData();
       formData.append("image", file);
 
-      // Simulate API call - replace with actual API in production
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await axios.post("/api/image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      // Mock response data
-      const mockData = {
-        Coffee: 4.5,
-        Sandwich: 8.95,
-        Pastry: 3.75,
-      };
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(
+          `API Error: ${response.status} - ${
+            errorData || "Failed to analyze image"
+          }`
+        );
+      }
+
+      const rawData = await response.json();
+      // Expects { "ItemName1": price1, "ItemName2": price2, ... }
+
+      // // Mock response data
+      // const mockData = {
+      //   Coffee: 4.5,
+      //   Sandwich: 8.95,
+      //   Pastry: 3.75,
+      // };
 
       // Parse the data (assuming object format {name: price})
-      const items = Object.entries(mockData).map(([name, price]) => ({
+      const items = Object.entries(rawData).map(([name, price]) => ({
         name,
+        // Ensure price is a number
         price: typeof price === "number" ? price : parseFloat(price) || 0,
       }));
 
@@ -102,20 +120,13 @@ const ScanBillPage = () => {
   const goToSummary = () => {
     if (parsedData) {
       navigate("/BillSummaryPage", { state: { billData: parsedData } });
+      console.log(parsedData);
     }
-  };
-
-  // Navigate back
-  const goBack = () => {
-    navigate(-1);
   };
 
   return (
     <div className="app-frame">
       <div className="scan-bill-container">
-        <ArrowLeft className="back-arrow" size={24} onClick={goBack} />
-        <h1 className="page-title">Scan Bill</h1>
-
         <input
           type="file"
           ref={fileInputRef}
@@ -133,7 +144,7 @@ const ScanBillPage = () => {
             </div>
 
             <button className="scan-button" onClick={handleCameraCapture}>
-              Scan
+              Scan bill
             </button>
 
             <button className="photo-button" onClick={handleGallerySelect}>

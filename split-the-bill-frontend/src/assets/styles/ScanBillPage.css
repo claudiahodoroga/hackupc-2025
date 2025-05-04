@@ -6,7 +6,7 @@
   width: 389px;
   height: 844px;
   margin: 0 auto;
-  background-color: #f7f7f7;
+  background-color: #9b9b9c;
   font-family: 'Inter', sans-serif;
   position: relative;
   padding: 8px;
@@ -81,7 +81,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2C64E3;
+  color: #ffffff;
   font-size: 16px;
   font-weight: 400;
   border: none;

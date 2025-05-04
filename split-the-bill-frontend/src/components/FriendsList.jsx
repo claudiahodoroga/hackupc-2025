@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import SearchBar from "./SearchBar";
 
-const FriendsList = ({ onFriendSelect, selectedFriends }) => {
+const FriendsList = ({ onFriendSelect, selectedFriends, onLoadFriends }) => {
   const [friends, setFriends] = useState([]);
   const [filteredFriends, setFilteredFriends] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,6 +16,10 @@ const FriendsList = ({ onFriendSelect, selectedFriends }) => {
         const response = await axios.get("/api/friends/6");
         setFriends(response.data);
         setFilteredFriends(response.data);
+
+        if (onLoadFriends) {
+          onLoadFriends(response.data); // Send data up to parent
+        }
       } catch (err) {
         console.error("Error fetching friends:", err);
         setError("Failed to load friends");
@@ -45,26 +49,6 @@ const FriendsList = ({ onFriendSelect, selectedFriends }) => {
 
   return (
     <div className="friends-list-container">
-      <div className="search-container">
-        <SearchBar onSearch={handleSearch} />
-        <button className="ai-button">
-          <span className="sparkle-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 2l3 6 6 1-4.5 4.5 1 6-5.5-3-5.5 3 1-6L3 9l6-1 3-6z"></path>
-            </svg>
-          </span>
-          Try telling the AI
-        </button>
-      </div>
-
       <div className="friends-card">
         {filteredFriends.length > 0 ? (
           filteredFriends.map((friend) => (

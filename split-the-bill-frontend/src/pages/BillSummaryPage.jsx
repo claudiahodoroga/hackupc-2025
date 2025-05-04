@@ -55,6 +55,7 @@ const PenIcon = () => (
 
 const BillSummaryPage = () => {
   const location = useLocation();
+  const [friends, setFriends] = useState([]);
 
   // Use data from navigation state if available, otherwise use sample data
   const billData = location.state?.billData || {
@@ -112,59 +113,52 @@ const BillSummaryPage = () => {
 
   // Prepare data for the next page
   const handleAccept = () => {
-    // Create a data structure for who pays what
+    const itemFriendMap = {};
+
+    billData.items.forEach((item, index) => {
+      const assignedFriendIds = Object.keys(
+        itemAssignments[index] || {}
+      ).filter((friendId) => itemAssignments[index][friendId]);
+
+      // Map IDs to names
+      const assignedFriendNames = assignedFriendIds.map((id) => {
+        const friend = friends.find((f) => f.id === id);
+        return friend ? friend.name : id;
+      });
+
+      itemFriendMap[item.name] = assignedFriendNames;
+    });
+
+    console.log("Item-to-friends map:", itemFriendMap);
+
+    // Si también quieres hacer el cálculo del monto dividido:
     const paymentData = {
       items: billData.items.map((item, index) => {
-        // Get friends assigned to this item
-        const assignedFriends = Object.keys(
-          itemAssignments[index] || {}
-        ).filter((friendId) => itemAssignments[index][friendId]);
-
+        const assignedFriendNames = itemFriendMap[item.name];
         return {
           ...item,
-          paidBy: assignedFriends,
+          paidBy: assignedFriendNames,
           splitAmount:
-            assignedFriends.length > 0
-              ? item.price / assignedFriends.length
+            assignedFriendNames.length > 0
+              ? item.price / assignedFriendNames.length
               : item.price,
         };
       }),
       total: billData.total,
     };
 
-    console.log("Payment data:", paymentData);
-    // Here you would navigate to the next page with this data
-    // history.push('/payment-summary', { paymentData });
+    console.log("Payment data with names:", paymentData);
   };
 
   return (
     <div className="app-container">
       <div className="header-area">
         <h1>Split the bill</h1>
-        <div className="search-container">
-          <div className="search-bar">
-            <SearchIcon />
-            <input type="text" placeholder="Search for a contact" />
-          </div>
-          <button className="ai-button">
-            <SparkleIcon />
-            Try telling the AI
-          </button>
-        </div>
       </div>
 
       <div className="items-section">
         <div className="subtitle">
-          <span>
-            Items
-            {selectedItemId !== null
-              ? ` (Select who's paying for ${billData.items[selectedItemId].name})`
-              : ""}
-          </span>
-          <button className="edit-button" onClick={handleEditItems}>
-            <PenIcon />
-            Edit
-          </button>
+          <span>Items</span>
         </div>
 
         <FoodItemList
@@ -173,6 +167,17 @@ const BillSummaryPage = () => {
           selectedItemId={selectedItemId}
           onSelectItem={handleItemSelect}
         />
+      </div>
+
+      <div className="search-container">
+        <div className="search-bar">
+          <SearchIcon />
+          <input type="text" placeholder="Search for a contact" />
+        </div>
+        <button className="ai-button">
+          <SparkleIcon />
+          Try telling the AI
+        </button>
       </div>
 
       <div className="friends-section">
@@ -186,6 +191,7 @@ const BillSummaryPage = () => {
           selectedFriends={
             selectedItemId !== null ? itemAssignments[selectedItemId] || {} : {}
           }
+          onLoadFriends={setFriends}
         />
       </div>
 

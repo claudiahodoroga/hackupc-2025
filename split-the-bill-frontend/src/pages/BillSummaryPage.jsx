@@ -2,14 +2,8 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import FoodItemList from "../components/FoodItemList";
 import SearchBar from "../components/SearchBar";
-import "../assets/styles/BillSummaryPage.css"; // Import our new CSS file
-
-// Sample data for the friends list
-const friendsData = [
-  { name: "Lila Landa", phone: "+34 612 345 678" },
-  { name: "Jhon", phone: "+34 612 345 678" },
-  { name: "Ferran", phone: "+34 612 345 678" },
-];
+import FriendsList from "../components/FriendsList";
+import "../assets/styles/BillSummaryPage.css";
 
 // Icons components
 const SearchIcon = () => (
@@ -73,13 +67,37 @@ const BillSummaryPage = () => {
     total: 23.6,
   };
 
-  const [selectedFriends, setSelectedFriends] = useState({});
+  // State to track the currently selected item
+  const [selectedItemId, setSelectedItemId] = useState(null);
 
-  const handleFriendSelect = (friendName) => {
-    setSelectedFriends((prev) => ({
-      ...prev,
-      [friendName]: !prev[friendName],
-    }));
+  // State to track which friends are selected for each item
+  const [itemAssignments, setItemAssignments] = useState({});
+
+  // Handle item selection
+  const handleItemSelect = (itemId) => {
+    setSelectedItemId(itemId);
+  };
+
+  // Handle friend selection for the currently selected item
+  const handleFriendSelect = (friendId) => {
+    if (selectedItemId === null) {
+      // If no item is selected, don't do anything
+      return;
+    }
+
+    setItemAssignments((prev) => {
+      // Get the current friends for this item or initialize an empty object
+      const currentItemFriends = prev[selectedItemId] || {};
+
+      // Toggle the selected state of this friend for this item
+      return {
+        ...prev,
+        [selectedItemId]: {
+          ...currentItemFriends,
+          [friendId]: !currentItemFriends[friendId],
+        },
+      };
+    });
   };
 
   const handleSearch = (query) => {
@@ -90,6 +108,33 @@ const BillSummaryPage = () => {
   const handleEditItems = () => {
     console.log("Edit items clicked");
     // Add edit functionality here
+  };
+
+  // Prepare data for the next page
+  const handleAccept = () => {
+    // Create a data structure for who pays what
+    const paymentData = {
+      items: billData.items.map((item, index) => {
+        // Get friends assigned to this item
+        const assignedFriends = Object.keys(
+          itemAssignments[index] || {}
+        ).filter((friendId) => itemAssignments[index][friendId]);
+
+        return {
+          ...item,
+          paidBy: assignedFriends,
+          splitAmount:
+            assignedFriends.length > 0
+              ? item.price / assignedFriends.length
+              : item.price,
+        };
+      }),
+      total: billData.total,
+    };
+
+    console.log("Payment data:", paymentData);
+    // Here you would navigate to the next page with this data
+    // history.push('/payment-summary', { paymentData });
   };
 
   return (
@@ -110,49 +155,45 @@ const BillSummaryPage = () => {
 
       <div className="items-section">
         <div className="subtitle">
-          <span>Items</span>
+          <span>
+            Items
+            {selectedItemId !== null
+              ? ` (Select who's paying for ${billData.items[selectedItemId].name})`
+              : ""}
+          </span>
           <button className="edit-button" onClick={handleEditItems}>
             <PenIcon />
             Edit
           </button>
         </div>
 
-        <div className="items-card">
-          {billData.items.map((item, index) => (
-            <div key={index} className="item-row">
-              <span className="item-name">{item.name}</span>
-              <span className="item-price">${item.price.toFixed(2)}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className="total-amount">Total : ${billData.total.toFixed(2)}</div>
+        <FoodItemList
+          items={billData.items}
+          total={billData.total}
+          selectedItemId={selectedItemId}
+          onSelectItem={handleItemSelect}
+        />
       </div>
 
       <div className="friends-section">
-        <h2>Select friends to split with</h2>
-        <div className="friends-card">
-          {friendsData.map((friend, index) => (
-            <div key={index} className="friend-row">
-              <input
-                type="checkbox"
-                className="friend-checkbox"
-                checked={selectedFriends[friend.name] || false}
-                onChange={() => handleFriendSelect(friend.name)}
-              />
-              <div className="friend-avatar"></div>
-              <div className="friend-info">
-                <div className="friend-name">{friend.name}</div>
-                <div className="friend-phone">{friend.phone}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <h2>
+          {selectedItemId !== null
+            ? `Select friends who will pay for ${billData.items[selectedItemId].name}`
+            : "Select an item first"}
+        </h2>
+        <FriendsList
+          onFriendSelect={handleFriendSelect}
+          selectedFriends={
+            selectedItemId !== null ? itemAssignments[selectedItemId] || {} : {}
+          }
+        />
       </div>
 
       <div className="footer">
         <button className="cancel-button">Cancel</button>
-        <button className="accept-button">Accept</button>
+        <button className="accept-button" onClick={handleAccept}>
+          Accept
+        </button>
       </div>
     </div>
   );

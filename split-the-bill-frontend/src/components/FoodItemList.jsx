@@ -1,6 +1,11 @@
 import React from "react";
 
-const FoodItemList = ({ items = [], total = 0 }) => {
+const FoodItemList = ({
+  items = [],
+  total = 0,
+  selectedItemId,
+  onSelectItem,
+}) => {
   return (
     <div className="items-section">
       <div className="items-card">
@@ -9,7 +14,13 @@ const FoodItemList = ({ items = [], total = 0 }) => {
         ) : (
           <>
             {items.map((item, index) => (
-              <div key={index} className="item-row">
+              <div
+                key={index}
+                className={`item-row ${
+                  selectedItemId === index ? "selected-item" : ""
+                }`}
+                onClick={() => onSelectItem(index)}
+              >
                 <span className="item-name">{item.name || "Unnamed Item"}</span>
                 <span className="item-price">
                   $

@@ -1,0 +1,218 @@
+/* ScanBillPage.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Global styles for the ScanBillPage */
+.scan-bill-container {
+  width: 389px;
+  height: 844px;
+  margin: 0 auto;
+  background-color: #9b9b9c;
+  font-family: 'Inter', sans-serif;
+  position: relative;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Page title */
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #000000;
+  margin-top: 62px;
+  margin-left: 44px;
+}
+
+/* Back button */
+.back-arrow {
+  position: absolute;
+  top: 62px;
+  left: 22px;
+  color: #000000;
+  cursor: pointer;
+}
+
+/* Scanner outline */
+.scanner-outline {
+  width: 303px;
+  height: 303px;
+  position: absolute;
+  top: 181px;
+  left: 44px;
+  border: 2px solid #f7f7f7;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* iOS corner smoothing */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+
+.scanner-icon {
+  color: #777f89;
+}
+
+/* Button styles */
+.scan-button {
+  width: 171px;
+  height: 48px;
+  background-color: #2C64E3;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 400;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0px 0px 8px rgba(44, 100, 227, 0.18);
+}
+
+.photo-button {
+  width: 171px;
+  height: 48px;
+  background-color: rgba(44, 100, 227, 0.2);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 400;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Image preview container */
+.image-preview-container {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.preview-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.remove-button {
+  display: flex;
+  align-items: center;
+  color: #777f89;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.bill-image {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* Status indicators */
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.spinner {
+  border: 3px solid rgba(44, 100, 227, 0.2);
+  border-top: 3px solid #2C64E3;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+.success-message {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+/* Summary button */
+.summary-button {
+  width: 100%;
+  height: 48px;
+  background-color: #2C64E3;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 400;
+  border: none;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+.scan-again-button {
+  width: 100%;
+  height: 48px;
+  background-color: #edeff2;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  font-size: 16px;
+  font-weight: 400;
+  border: none;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* Frame border for phone view */
+.app-frame {
+  border: 1px solid #9b9b9c;
+  border-radius: 32px;
+  overflow: hidden;
+  width: 389px;
+  height: 844px;
+  margin: 0 auto;
+}

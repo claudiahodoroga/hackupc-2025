@@ -1,15 +1,28 @@
+import React from "react";
 import { useState } from "react";
-import "./App.css";
-import RecordingAudioPage from "./pages/RecordAudioPage";
-import ScanBillPage from "./pages/ScanBillPage";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ScanBillPage from "./pages/ScanBillPage"; // Adjust path as needed
+import BillSummaryPage from "./pages/BillSummaryPage"; // Adjust path as needed
+import FinalViewPage from "./pages/FinalViewPage";
+import "./index.css"; // Import reset and variables CSS first
+import "./App.css"; // Import main application CSS
 
 function App() {
   return (
-    <div>
-      <h1> Upload a recording of your bill</h1>
-      {/*<RecordingAudioPage />*/}
-      <ScanBillPage />
-    </div>
+    <Router>
+      <div className="min-h-screen">
+        <Routes>
+          {/* Default route */}
+          <Route path="/" element={<ScanBillPage />} />
+          {/* Route for the scan page */}
+          <Route path="/scan" element={<ScanBillPage />} />
+          {/* Route for the summary page */}
+          <Route path="/BillSummaryPage" element={<BillSummaryPage />} />
+          {/* Add other routes as needed */}
+          <Route path="/FinalViewPage" element={<FinalViewPage />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

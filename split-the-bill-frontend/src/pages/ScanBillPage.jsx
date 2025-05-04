@@ -1,22 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
-import Button from "../components/button"; // Import the Button component
-import { Camera, X } from "lucide-react"; // Import camera and X icons
-//import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Camera, X } from "lucide-react"; // Import Arrow icon
+import "../assets/styles/ScanBillPage.css"; // Import our new CSS file
 
 const ScanBillPage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [parsedData, setParsedData] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const fileInputRef = useRef(null);
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
   // Handle gallery image selection
   const handleGallerySelect = () => {
-    // Only proceed if not uploading and ref exists
     if (!isUploading && fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -29,49 +27,28 @@ const ScanBillPage = () => {
       setUploadError(null);
       setUploadSuccess(false);
       setSelectedImage(URL.createObjectURL(file));
-      setSelectedImageFile(file);
       console.log("File selected:", file); // Check the File object
-      //handleImageUpload(file); // You're still passing 'file' here, let's keep it for now
+      handleImageUpload(file);
       e.target.value = "";
     }
   };
 
   // Handle camera capture
   const handleCameraCapture = () => {
-    // Only proceed if not uploading and ref exists
     if (!isUploading && fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
-  useEffect(() => {
-    if (selectedImageFile) {
-      console.log("selectedImageFile state in useEffect: ", selectedImageFile);
-      handleImageUpload();
-    }
-  }, [selectedImageFile]);
-
   // Handle image upload
-  const handleImageUpload = async () => {
-    console.log("handleImageUpload called");
-    console.log(
-      "selectedImageFile state inside handleImageUpload:",
-      selectedImageFile
-    );
-
+  const handleImageUpload = async (file) => {
     setIsUploading(true);
     setUploadError(null);
     setUploadSuccess(false);
     setParsedData(null);
     try {
       // client-side validation
-      if (!selectedImageFile) {
-        // Add this check
-        console.log("selectedImageFile is null, not proceeding with upload.");
-        return; // Exit the function if no file is selected yet
-      }
-
-      if (!selectedImageFile?.type?.startsWith("image/")) {
+      if (!file.type.startsWith("image/")) {
         throw new Error("Please select an image file.");
       }
 
@@ -80,7 +57,7 @@ const ScanBillPage = () => {
       }
 
       const formData = new FormData();
-      formData.append("image", selectedImageFile); // 'selectedImageFile' es un objeto File
+      formData.append("image_file", file);
 
       const response = await axios.post("/api/image", formData, {
         headers: {
@@ -88,17 +65,15 @@ const ScanBillPage = () => {
         },
       });
 
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(
-          `API Error: ${response.status} - ${
-            errorData || "Failed to analyze image"
-          }`
-        );
-      }
-
-      const rawData = await response.json();
+      const rawData = await response.data;
       // Expects { "ItemName1": price1, "ItemName2": price2, ... }
+
+      // // Mock response data
+      // const mockData = {
+      //   Coffee: 4.5,
+      //   Sandwich: 8.95,
+      //   Pastry: 3.75,
+      // };
 
       // Parse the data (assuming object format {name: price})
       const items = Object.entries(rawData).map(([name, price]) => ({
@@ -112,10 +87,15 @@ const ScanBillPage = () => {
       // Store the parsed items and total for summary page
       setParsedData({ items, total });
       setUploadSuccess(true);
-
-      console.log("Image analyzed successfully:", { items, total });
     } catch (error) {
       console.error("Upload/API error:", error);
+      setUploadError(
+        error.response
+          ? `Server error: ${error.response.status} - ${
+              error.response.data || "Unknown error"
+            }`
+          : error.message
+      );
       setSelectedImage(null);
     } finally {
       setIsUploading(false);
@@ -128,7 +108,6 @@ const ScanBillPage = () => {
     setParsedData(null);
     setUploadError(null);
     setUploadSuccess(false);
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -137,124 +116,93 @@ const ScanBillPage = () => {
   // Navigate to bill summary page
   const goToSummary = () => {
     if (parsedData) {
-      //navigate("/BillSummaryPage", { state: { billData: parsedData } }); // Pass data in state
+      navigate("/BillSummaryPage", { state: { billData: parsedData } });
       console.log(parsedData);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-8">Scan Bill</h1>
+    <div className="app-frame">
+      <div className="scan-bill-container">
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept="image/*"
+          style={{ display: "none" }}
+          aria-hidden="true"
+        />
 
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept="image/*"
-        style={{ display: "none" }}
-        aria-hidden="true"
-      />
+        {/* Camera scanner outline shown only when no image selected */}
+        {!selectedImage && !isUploading && (
+          <>
+            <div className="scanner-outline">
+              <Camera className="scanner-icon" size={64} />
+            </div>
 
-      {/* Buttons shown only if no image is selected */}
-      {!selectedImage && (
-        <div className="w-full space-y-4 mb-6">
-          <Button
-            type="button"
-            id="gallery-button"
-            onClick={handleGallerySelect}
-            className={`w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors ${
-              isUploading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            Choose Photo
-          </Button>
+            <button className="scan-button" onClick={handleCameraCapture}>
+              Scan bill
+            </button>
 
-          <Button
-            type="button"
-            id="camera-button"
-            onClick={handleCameraCapture}
-            className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center"
-            disabled={isUploading}
-          >
-            <Camera className="mr-2" size={20} />
-            Scan Document
-          </Button>
-        </div>
-      )}
+            <button className="photo-button" onClick={handleGallerySelect}>
+              Choose Photo
+            </button>
+          </>
+        )}
 
-      {/* Loading Indicator */}
-      {isUploading && (
-        <div className="text-center mb-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-          <p>Uploading and analyzing...</p>
-        </div>
-      )}
-
-      {/* Error Message */}
-      {uploadError && !isUploading && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 w-full">
-          <p>Error: {uploadError}</p>
-        </div>
-      )}
-
-      {/* Success Message */}
-      {uploadSuccess && !isUploading && !uploadError && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 w-full">
-          <p>Success! Image analyzed.</p>
-        </div>
-      )}
-
-      {/* Image Preview and Actions */}
-      {selectedImage && !isUploading && (
-        <div className="mt-4 w-full">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold">Bill Preview</h2>
-            <Button
-              type="button"
-              onClick={handleRemoveImage}
-              className="flex items-center text-red-500 hover:text-red-700"
-            >
-              <X size={16} className="mr-1" />
-              Remove
-            </Button>
+        {/* Loading Indicator */}
+        {isUploading && (
+          <div className="loading-indicator">
+            <div className="spinner"></div>
+            <p>Uploading and analyzing...</p>
           </div>
+        )}
 
-          <div className="border rounded-lg overflow-hidden mb-4">
+        {/* Error Message */}
+        {uploadError && !isUploading && (
+          <div className="error-message">
+            <p>Error: {uploadError}</p>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {uploadSuccess && !isUploading && !uploadError && (
+          <div className="success-message">
+            <p>Success! Image analyzed.</p>
+          </div>
+        )}
+
+        {/* Image Preview and Actions */}
+        {selectedImage && !isUploading && (
+          <div className="image-preview-container">
+            <div className="preview-header">
+              <h2 className="preview-title">Bill Preview</h2>
+              <button className="remove-button" onClick={handleRemoveImage}>
+                <X size={16} className="mr-1" />
+                Remove
+              </button>
+            </div>
+
             <img
               src={selectedImage}
               alt="Selected bill"
-              className="w-full object-contain max-h-64"
+              className="bill-image"
             />
+
+            {/* View Bill Summary Button */}
+            {parsedData && !uploadError && (
+              <button className="summary-button" onClick={goToSummary}>
+                View Bill Summary
+              </button>
+            )}
+
+            {/* Button to Scan Again if an image was selected */}
+            <button className="scan-again-button" onClick={handleGallerySelect}>
+              Scan Another Bill
+            </button>
           </div>
-
-          {/* Display raw parsed data for testing (optional) */}
-          {/* {parsedData && (
-                        <pre className="bg-gray-100 p-2 rounded text-xs overflow-auto mb-4">
-                            {JSON.stringify(parsedData, null, 2)}
-                        </pre>
-                    )} */}
-
-          {/* --- View Bill Summary Button --- */}
-          {parsedData && !uploadError && (
-            <Button
-              type="button"
-              onClick={goToSummary}
-              className="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors mt-4"
-            >
-              View Bill Summary
-            </Button>
-          )}
-
-          {/* Button to Scan Again if an image was selected */}
-          <Button
-            type="button"
-            onClick={handleGallerySelect} // Or handleCameraCapture if preferred
-            className="w-full bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition-colors mt-2"
-          >
-            Scan Another Bill
-          </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

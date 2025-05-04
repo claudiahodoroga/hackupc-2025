@@ -29,17 +29,17 @@ const RecordAudioPage = () => {
     mediaRecorderRef.current.onstop = () => {
       if (audioChunksRef.current.length === 0) {
         console.warn(
-          "⚠️ No se recibieron datos de audio. La grabación está vacía."
+          " No se recibieron datos de audio. La grabación está vacía."
         );
         setAudioBlob(null);
         return;
       }
 
       const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-      console.log("✅ Grabación detenida");
-      console.log("🔢 Chunks recibidos:", audioChunksRef.current.length);
-      console.log("📦 Tamaño del blob:", blob.size, "bytes");
-      console.log("📄 Tipo MIME:", blob.type);
+      console.log(" Grabación detenida");
+      console.log(" Chunks recibidos:", audioChunksRef.current.length);
+      console.log(" Tamaño del blob:", blob.size, "bytes");
+      console.log(" Tipo MIME:", blob.type);
 
       if (blob.size === 0) {
         console.warn(

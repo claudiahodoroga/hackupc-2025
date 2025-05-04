@@ -1,4 +1,4 @@
-/* App.css - Main application styles */
+/* Bill Splitting App Styles */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* Base Styles */
@@ -16,22 +16,14 @@ body {
   line-height: 1.5;
 }
 
-/* App Container - Ensures mobile-first approach */
-#root {
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-}
-
 .app-container {
   width: 389px;
   max-width: 100%;
-  height: 100vh; /* Use viewport height */
-  max-height: 844px; /* Maximum height as per design */
+  height: 844px;
+  max-height: 100vh;
   margin: 0 auto;
   padding: 24px 8px;
   overflow-y: auto;
-  background-color: #f7f7f7;
 }
 
 /* Typography */
@@ -110,7 +102,6 @@ h2 {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  white-space: nowrap;
 }
 
 .sparkle-icon {
@@ -263,11 +254,12 @@ h2 {
   box-shadow: 0 0 8px 12px rgba(44, 100, 227, 0.18);
 }
 
-/* Override any existing Tailwind classes if needed */
-.min-h-screen.bg-gray-100 {
-  background-color: #f7f7f7;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Frame border for phone view */
+.app-container {
+  border: 1px solid #9b9b9c;
+  border-radius: 32px;
+  overflow: hidden;
+  width: 389px;
+  height: 844px;
+  margin: 0 auto;
 }

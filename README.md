@@ -2,7 +2,9 @@
 
 Prototype of a bill-splitting feature inspired by Revolut, using OCR to extract receipt data and automate cost distribution.
 
-https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/003/406/294/datas/gallery.jpg
+<p align="center">
+  <img src="https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/003/406/294/datas/gallery.jpg" alt="it's meee" width="10%" display="block" align="center"/>
+</p>
 
 ## Tech stack
 - React-based frontend

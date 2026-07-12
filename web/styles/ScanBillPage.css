@@ -220,3 +220,9 @@
   height: 932px;
   margin: 0 auto;
 }
+/* These buttons are centered via translateX; the global :active scale must
+   compose with it or the button jumps half its width on press. */
+.scan-button:active:not(:disabled),
+.photo-button:active:not(:disabled) {
+  transform: translateX(-50%) scale(0.99);
+}

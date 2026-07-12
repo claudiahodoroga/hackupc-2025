@@ -124,6 +124,7 @@ const ScanBillPage = () => {
   const goToSummary = () => {
     if (parsedData) {
       sessionStorage.setItem("billData", JSON.stringify(parsedData));
+      sessionStorage.removeItem("itemAssignments");
       router.push("/summary");
     }
   };

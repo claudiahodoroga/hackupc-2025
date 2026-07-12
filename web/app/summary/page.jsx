@@ -53,10 +53,22 @@ const BillSummaryPage = () => {
     const stored = sessionStorage.getItem("billData");
     if (stored) {
       setBillData(JSON.parse(stored));
+      // Restore assignments made earlier so returning from the review
+      // screen picks up where the user left off
+      const savedAssignments = sessionStorage.getItem("itemAssignments");
+      if (savedAssignments) {
+        setItemAssignments(JSON.parse(savedAssignments));
+      }
     } else {
       router.replace("/");
     }
   }, [router]);
+
+  useEffect(() => {
+    if (billData) {
+      sessionStorage.setItem("itemAssignments", JSON.stringify(itemAssignments));
+    }
+  }, [itemAssignments, billData]);
 
   if (!billData) return null;
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 
 const FriendsList = ({ onFriendSelect, selectedFriends, onLoadFriends, filter = "" }) => {
   const [friends, setFriends] = useState([]);
+  const [ownerId, setOwnerId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -14,6 +15,7 @@ const FriendsList = ({ onFriendSelect, selectedFriends, onLoadFriends, filter = 
         const response = await fetch("/api/friends");
         const data = await response.json();
         setFriends(data.friends);
+        setOwnerId(data.user.id);
         if (onLoadFriends) {
           onLoadFriends(data.friends);
         }
@@ -28,9 +30,14 @@ const FriendsList = ({ onFriendSelect, selectedFriends, onLoadFriends, filter = 
     fetchFriends();
   }, []);
 
+  const displayName = (friend) =>
+    friend.id === ownerId ? "You" : friend.name;
+
   const filteredFriends = filter.trim()
-    ? friends.filter((friend) =>
-        friend.name.toLowerCase().includes(filter.toLowerCase())
+    ? friends.filter(
+        (friend) =>
+          friend.name.toLowerCase().includes(filter.toLowerCase()) ||
+          displayName(friend).toLowerCase().includes(filter.toLowerCase())
       )
     : friends;
 
@@ -51,7 +58,7 @@ const FriendsList = ({ onFriendSelect, selectedFriends, onLoadFriends, filter = 
               />
               <div className="friend-avatar"></div>
               <div className="friend-info">
-                <div className="friend-name">{friend.name}</div>
+                <div className="friend-name">{displayName(friend)}</div>
                 <div className="friend-phone">{friend.phone}</div>
               </div>
             </div>

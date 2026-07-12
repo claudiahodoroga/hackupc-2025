@@ -2,11 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Pencil, Check } from "lucide-react";
+
+const DEMO_USER_NAME = "Marco";
 
 const FinalViewPage = () => {
   const router = useRouter();
   const [paymentData, setPaymentData] = useState(null);
   const [sent, setSent] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("paymentData");
@@ -33,13 +37,14 @@ const FinalViewPage = () => {
     });
   });
 
-  const handleBack = () => {
-    router.back();
+  const handleEdit = () => {
+    router.push("/summary");
   };
 
   const handleSend = () => {
     // Demo prototype: payment requests are simulated
     setSent(true);
+    setShowSuccess(true);
   };
 
   return (
@@ -48,32 +53,25 @@ const FinalViewPage = () => {
         <h1>Review bill</h1>
         <div className="subtitle">
           <span>Summary</span>
+          <button className="edit-button" onClick={handleEdit}>
+            <Pencil size={14} />
+            Edit
+          </button>
         </div>
       </div>
 
       <div className="items-card">
         {Object.keys(personMap).length > 0 ? (
           Object.entries(personMap).map(([name, data], index) => (
-            <div
-              key={index}
-              className="item-row"
-              style={{ alignItems: "flex-start", flexDirection: "column" }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  width: "100%",
-                }}
-              >
-                <span style={{ fontWeight: "600" }}>{name}</span>
-                <span style={{ fontWeight: "500" }}>
-                  ${data.total.toFixed(2)}
-                </span>
+            <div key={index} className="person-row">
+              <div className="person-avatar"></div>
+              <div className="person-details">
+                <div className="person-name">
+                  {name === DEMO_USER_NAME ? "You" : name}
+                </div>
+                <div className="person-items">{data.items.join(", ")}</div>
               </div>
-              <span style={{ fontSize: "14px", color: "#777f89" }}>
-                {data.items.join(", ")}
-              </span>
+              <div className="person-total">${data.total.toFixed(2)}</div>
             </div>
           ))
         ) : (
@@ -83,20 +81,27 @@ const FinalViewPage = () => {
         )}
       </div>
 
-      {sent && (
-        <div className="success-message">
-          <p>Payment requests sent! (demo — no real requests are made)</p>
-        </div>
-      )}
-
       <div className="footer">
-        <button className="cancel-button" onClick={handleBack}>
+        <button className="cancel-button" onClick={() => router.push("/summary")}>
           Back
         </button>
         <button className="accept-button" onClick={handleSend} disabled={sent}>
           {sent ? "Requests sent" : "Send requests"}
         </button>
       </div>
+
+      {showSuccess && (
+        <div className="success-overlay" onClick={() => setShowSuccess(false)}>
+          <div className="success-card">
+            <div className="success-check">
+              <Check size={44} strokeWidth={2.5} />
+            </div>
+            <div className="success-text">
+              Bill requests successfully sent to your contacts
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -260,7 +260,7 @@ h2 {
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 0 8px 12px rgba(44, 100, 227, 0.18);
+  box-shadow: 0 4px 10px rgba(44, 100, 227, 0.25);
 }
 
 /* Override any existing Tailwind classes if needed */

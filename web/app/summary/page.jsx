@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Pencil, Check } from "lucide-react";
 import FoodItemList from "@/components/FoodItemList";
 import FriendsList from "@/components/FriendsList";
 import VoiceRecorder from "@/components/VoiceRecorder";
@@ -46,6 +47,7 @@ const BillSummaryPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [voiceNotice, setVoiceNotice] = useState(null);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("billData");
@@ -57,6 +59,44 @@ const BillSummaryPage = () => {
   }, [router]);
 
   if (!billData) return null;
+
+  const persistBill = (next) => {
+    setBillData(next);
+    sessionStorage.setItem("billData", JSON.stringify(next));
+  };
+
+  const recomputeTotal = (items) =>
+    items.reduce(
+      (sum, item) => sum + (typeof item.price === "number" ? item.price : 0),
+      0
+    );
+
+  const handleChangeItem = (index, field, value) => {
+    const items = billData.items.map((item, i) => {
+      if (i !== index) return item;
+      if (field === "name") return { ...item, name: value };
+      if (field === "qty")
+        return { ...item, qty: Math.max(1, parseInt(value, 10) || 1) };
+      return { ...item, price: Math.max(0, parseFloat(value) || 0) };
+    });
+    persistBill({ ...billData, items, total: recomputeTotal(items) });
+  };
+
+  const handleRemoveItem = (index) => {
+    const items = billData.items.filter((_, i) => i !== index);
+    persistBill({ ...billData, items, total: recomputeTotal(items) });
+    // Assignments are keyed by item index, so shift them past the removal
+    setItemAssignments((prev) => {
+      const next = {};
+      for (const [key, value] of Object.entries(prev)) {
+        const i = Number(key);
+        if (i < index) next[i] = value;
+        else if (i > index) next[i - 1] = value;
+      }
+      return next;
+    });
+    setSelectedItemId(null);
+  };
 
   const handleItemSelect = (itemId) => {
     setSelectedItemId(itemId);
@@ -135,11 +175,31 @@ const BillSummaryPage = () => {
     <div className="app-container">
       <div className="header-area">
         <h1>Split the bill</h1>
+
+        <div className="search-container">
+          <div className="search-bar">
+            <SearchIcon />
+            <input
+              type="text"
+              placeholder="Search for a contact"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <button className="ai-button" onClick={() => setShowVoiceModal(true)}>
+            <SparkleIcon />
+            Try telling the AI
+          </button>
+        </div>
       </div>
 
       <div className="items-section">
         <div className="subtitle">
           <span>Items</span>
+          <button className="edit-button" onClick={() => setEditing(!editing)}>
+            {editing ? <Check size={14} /> : <Pencil size={14} />}
+            {editing ? "Done" : "Edit"}
+          </button>
         </div>
 
         <FoodItemList
@@ -147,23 +207,10 @@ const BillSummaryPage = () => {
           total={billData.total}
           selectedItemId={selectedItemId}
           onSelectItem={handleItemSelect}
+          editing={editing}
+          onChangeItem={handleChangeItem}
+          onRemoveItem={handleRemoveItem}
         />
-      </div>
-
-      <div className="search-container">
-        <div className="search-bar">
-          <SearchIcon />
-          <input
-            type="text"
-            placeholder="Search for a contact"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <button className="ai-button" onClick={() => setShowVoiceModal(true)}>
-          <SparkleIcon />
-          Try telling the AI
-        </button>
       </div>
 
       {voiceNotice && <div className="voice-notice">{voiceNotice}</div>}
@@ -172,7 +219,7 @@ const BillSummaryPage = () => {
         <h2>
           {selectedItemId !== null
             ? `Select friends who will pay for ${billData.items[selectedItemId].name}`
-            : "Select an item first"}
+            : "Select friends to split with"}
         </h2>
         <FriendsList
           onFriendSelect={handleFriendSelect}
@@ -189,7 +236,7 @@ const BillSummaryPage = () => {
           Cancel
         </button>
         <button className="accept-button" onClick={handleAccept}>
-          Finish Process
+          Accept
         </button>
       </div>
 

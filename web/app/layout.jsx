@@ -1,8 +1,11 @@
+import { Inter } from "next/font/google";
 import "@/styles/index.css";
 import "@/styles/App.css";
 import "@/styles/ScanBillPage.css";
 import "@/styles/BillSummaryPage.css";
 import "@/styles/SearchBar.css";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Split the Bill",
@@ -13,7 +16,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
+      <body className={inter.className}>
         <div className="min-h-screen">{children}</div>
       </body>
     </html>

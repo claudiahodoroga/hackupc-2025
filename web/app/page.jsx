@@ -4,6 +4,30 @@ import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Camera, X } from "lucide-react";
 
+// Resize to at most maxDim on the long edge and re-encode as JPEG.
+// Falls back to the original file if decoding fails (e.g. exotic formats).
+async function downscaleImage(file, maxDim = 1600) {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    if (scale === 1 && file.type === "image/jpeg") return file;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+
+    const blob = await new Promise((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.85)
+    );
+    if (!blob) return file;
+    return new File([blob], "receipt.jpg", { type: "image/jpeg" });
+  } catch {
+    return file;
+  }
+}
+
 const ScanBillPage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [parsedData, setParsedData] = useState(null);
@@ -43,14 +67,28 @@ const ScanBillPage = () => {
         throw new Error("Image size must be less than 10MB");
       }
 
+      // Phone photos can be 10+ MP; downscale before upload so the vision
+      // model gets a manageable payload and the request stays fast.
+      const upload = await downscaleImage(file);
+
       const formData = new FormData();
-      formData.append("image_file", file);
+      formData.append("image_file", upload, upload.name || "receipt.jpg");
 
       const response = await fetch("/api/image", {
         method: "POST",
         body: formData,
       });
-      const rawData = await response.json();
+      let rawData;
+      try {
+        rawData = await response.json();
+      } catch {
+        // Gateway errors (e.g. 504) return plain text, not JSON
+        throw new Error(
+          response.ok
+            ? "Unexpected server response. Please try again."
+            : `Server error: ${response.status}. Please try again.`
+        );
+      }
       if (!response.ok) {
         throw new Error(rawData.detail || `Server error: ${response.status}`);
       }

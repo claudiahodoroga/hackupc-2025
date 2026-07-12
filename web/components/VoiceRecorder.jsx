@@ -71,7 +71,13 @@ const VoiceRecorder = ({ products, onAssignments, onClose }) => {
         method: "POST",
         body: formData,
       });
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        // Gateway errors (e.g. 504) return plain text, not JSON
+        throw new Error(`Server error: ${response.status}. Please try again.`);
+      }
       if (!response.ok) {
         throw new Error(data.detail || `Server error: ${response.status}`);
       }

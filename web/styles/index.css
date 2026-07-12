@@ -1,0 +1,79 @@
+/* index.css - Reset styles and global CSS variables */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Brand Colors */
+  --color-background: #f7f7f7;
+  --color-card: #ffffff;
+  --color-accent: #2b61dc;
+  --color-accent-light: #e8f0fc;
+  --color-text: #000000;
+  --color-text-secondary: #777f89;
+  --color-border: #edeff2;
+  --color-accent-muted: #a6bcef;
+
+  /* Font Sizes */
+  --font-size-title: 32px;
+  --font-size-subtitle: 18px;
+  --font-size-body: 16px;
+  --font-size-small: 14px;
+  --font-size-xs: 12px;
+}
+
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+}
+
+/* Clean up any existing styles that might conflict */
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+}
+
+input {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Mobile-first styles */
+@media (max-width: 389px) {
+  .app-container {
+    width: 100%;
+    padding: 16px 8px;
+  }
+  
+  .search-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .search-bar input {
+    width: 100%;
+  }
+  
+  .footer {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .cancel-button, 
+  .accept-button {
+    width: 100%;
+  }
+}

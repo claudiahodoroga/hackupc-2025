@@ -1,6 +1,6 @@
 const BASE_URL = "https://api.tensorx.ai/v1";
 const VISION_MODEL = "moonshotai/kimi-k2.5";
-const CHAT_MODEL = "moonshotai/kimi-k2.5";
+const CHAT_MODEL = "deepseek/deepseek-chat-v3.1";
 const WHISPER_MODEL = "Systran/faster-whisper-large-v3";
 
 function apiKey() {

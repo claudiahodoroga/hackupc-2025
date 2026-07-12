@@ -25,27 +25,24 @@ export async function POST(request) {
         friendNames.join(", "),
     });
 
-    // Extract who pays for what, then map the mentioned items onto the
-    // actual receipt products — same two-step flow as the original backend.
-    const identified = parseJsonResponse(
+    // Single LLM call: extract who pays for what AND map the mentioned items
+    // onto the actual receipt products (the original backend did this in two
+    // steps, but one call keeps us well within the serverless time budget).
+    const assignments = parseJsonResponse(
       await chatCompletion([
         {
           role: "user",
-          content: extractionPrompt(text, DEMO_USER.name),
+          content: assignmentPrompt(
+            text,
+            DEMO_USER.name,
+            Object.keys(products),
+            [DEMO_USER.name, ...friendNames]
+          ),
         },
       ])
     );
 
-    const categorized = parseJsonResponse(
-      await chatCompletion([
-        {
-          role: "user",
-          content: categorizationPrompt(identified, Object.keys(products)),
-        },
-      ])
-    );
-
-    const validated = validateAssignments(categorized, Object.keys(products), [
+    const validated = validateAssignments(assignments, Object.keys(products), [
       DEMO_USER.name,
       ...friendNames,
     ]);
@@ -57,39 +54,24 @@ export async function POST(request) {
   }
 }
 
-function extractionPrompt(sentence, userName) {
-  return `You are a data extraction assistant. I will give you a sentence and you must identify who pays for each product.
+function assignmentPrompt(sentence, userName, productNames, knownPeople) {
+  return `You are a bill-splitting assistant. I will give you a sentence describing who pays for what, a list of receipt products, and a list of known people.
 
-Extract a JSON dictionary where the keys are the product names, and the values are lists of people who will pay for those products.
-Note that if the first person ("I", "me") is used, you have to interpret it as a person called "${userName}".
+Your job:
+1. Identify from the sentence which person pays for which products. If the first person ("I", "me") is used, interpret it as "${userName}".
+2. Map every mentioned product onto the receipt products in list B (a mentioned product may match one receipt product, group several, or several mentions may map to one).
 
-Return only a valid JSON like this:
-{ "pizza": ["Antonia", "Pepe"], "beverages": ["Marco"], "candies": ["Andres"] }
+Return only a valid JSON dictionary whose keys are ONLY products from list B (exactly as written) and whose values are lists of people (from the known people list) paying for them, like:
+{ "Fries": ["Antonia", "Pepe"], "Coke": ["Marco"] }
 
 Rules:
-- Return a valid JSON dictionary.
-- Keys: products. Values: list of people paying for the product.
 - Do NOT include anything else: no code fences, no explanations, no markdown, just JSON.
 - Respect corrections, negations and handle human messes.
+- Omit receipt products nobody was assigned to.
 
-Sentence: ${sentence}`;
-}
-
-function categorizationPrompt(identified, productNames) {
-  return `You are a product identifier expert and you will have to categorize products precisely.
-I will give you a dictionary A of initial products and people who pay for them, and a list B of final products.
-Your job is to map the initial products of dictionary A onto the products of list B.
-Return a JSON dictionary with the same structure as A, but whose keys are ONLY products from list B, along with the people who pay for them.
-
-Note that an initial product can be the same as a final one, an initial product can group several final products, or several initial products can map to one final product.
-
-Rules:
-- Return a valid JSON dictionary. Keys must come from list B exactly as written.
-- Values: list of people paying for the product.
-- Do NOT include anything else: no code fences, no explanations, no markdown, just JSON.
-
-Dictionary A: ${JSON.stringify(identified)}
-List B: ${JSON.stringify(productNames)}`;
+Sentence: ${sentence}
+List B (receipt products): ${JSON.stringify(productNames)}
+Known people: ${JSON.stringify(knownPeople)}`;
 }
 
 function validateAssignments(data, productNames, knownPeople) {

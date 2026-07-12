@@ -3,7 +3,6 @@ import { X } from "lucide-react";
 
 const FoodItemList = ({
   items = [],
-  total = 0,
   selectedItemId,
   onSelectItem,
   editing = false,
@@ -74,12 +73,6 @@ const FoodItemList = ({
           ))
         )}
       </div>
-
-      {items.length > 0 && (
-        <div className="total-amount">
-          Total · ${(typeof total === "number" ? total : 0).toFixed(2)}
-        </div>
-      )}
     </div>
   );
 };

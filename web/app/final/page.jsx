@@ -54,7 +54,7 @@ const FinalViewPage = () => {
         <div className="subtitle">
           <span>Summary</span>
           <button className="edit-button" onClick={handleEdit}>
-            <Pencil size={14} />
+            <Pencil size={17} />
             Edit
           </button>
         </div>

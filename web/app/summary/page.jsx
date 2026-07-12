@@ -175,8 +175,33 @@ const BillSummaryPage = () => {
     <div className="app-container">
       <div className="header-area">
         <h1>Split the bill</h1>
+      </div>
 
-        <div className="search-container">
+      <div className="items-section">
+        <div className="subtitle">
+          <span>Items</span>
+          <div className="subtitle-actions">
+            <button className="ai-button" onClick={() => setShowVoiceModal(true)}>
+              <SparkleIcon />
+              Try telling the AI
+            </button>
+            <button className="edit-button" onClick={() => setEditing(!editing)}>
+              {editing ? <Check size={17} /> : <Pencil size={17} />}
+              {editing ? "Done" : "Edit"}
+            </button>
+          </div>
+        </div>
+
+        <FoodItemList
+          items={billData.items}
+          selectedItemId={selectedItemId}
+          onSelectItem={handleItemSelect}
+          editing={editing}
+          onChangeItem={handleChangeItem}
+          onRemoveItem={handleRemoveItem}
+        />
+
+        <div className="search-total-row">
           <div className="search-bar">
             <SearchIcon />
             <input
@@ -186,31 +211,10 @@ const BillSummaryPage = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className="ai-button" onClick={() => setShowVoiceModal(true)}>
-            <SparkleIcon />
-            Try telling the AI
-          </button>
+          <div className="total-amount">
+            Total · ${billData.total.toFixed(2)}
+          </div>
         </div>
-      </div>
-
-      <div className="items-section">
-        <div className="subtitle">
-          <span>Items</span>
-          <button className="edit-button" onClick={() => setEditing(!editing)}>
-            {editing ? <Check size={14} /> : <Pencil size={14} />}
-            {editing ? "Done" : "Edit"}
-          </button>
-        </div>
-
-        <FoodItemList
-          items={billData.items}
-          total={billData.total}
-          selectedItemId={selectedItemId}
-          onSelectItem={handleItemSelect}
-          editing={editing}
-          onChangeItem={handleChangeItem}
-          onRemoveItem={handleRemoveItem}
-        />
       </div>
 
       {voiceNotice && <div className="voice-notice">{voiceNotice}</div>}
